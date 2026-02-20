@@ -6,7 +6,7 @@ const projectRoot = path.resolve(__dirname, "..");
 
 export const config = {
   port: Number(process.env.PORT) || 3000,
-  uploadMaxBytes: Number(process.env.UPLOAD_MAX_BYTES) || 50 * 1024 * 1024, // 50MB
+  uploadMaxBytes: Number(process.env.UPLOAD_MAX_BYTES) || 200 * 1024 * 1024, // 200MB default
   allowedMimes: [
     "audio/mpeg",
     "audio/mp3",
