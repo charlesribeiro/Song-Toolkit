@@ -22,6 +22,7 @@
     "@angular-devkit/build-angular": "^18.0.0",
     "@angular/cli": "^18.0.0",
     "@angular/compiler-cli": "^18.0.0",
+    "pm2": "^6.0.14",
     "typescript": "~5.4.0"
   }
 }

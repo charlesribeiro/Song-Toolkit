@@ -28,14 +28,21 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use("/convert", convertRouter);
 
 const frontendDir = path.resolve(__dirname, "..", "frontend", "dist", "frontend");
-const frontendPath = fs.existsSync(path.join(frontendDir, "browser"))
-  ? path.join(frontendDir, "browser")
-  : frontendDir;
-const indexHtml = path.join(frontendPath, "index.html");
-logger.info("Frontend path", { frontendPath, exists: fs.existsSync(indexHtml) });
-if (fs.existsSync(indexHtml)) {
+const browserDir = path.join(frontendDir, "browser");
+const frontendPath = fs.existsSync(path.join(browserDir, "index.html"))
+  ? browserDir
+  : fs.existsSync(path.join(frontendDir, "index.html"))
+    ? frontendDir
+    : "";
+const indexHtml = frontendPath ? path.join(frontendPath, "index.html") : "";
+logger.info("Frontend path", { frontendPath: frontendPath || "(none)", exists: !!frontendPath && fs.existsSync(indexHtml) });
+if (frontendPath && fs.existsSync(indexHtml)) {
   app.use(express.static(frontendPath));
   app.get("*", (_req, res, next: NextFunction) => {
+    if (!fs.existsSync(indexHtml)) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     res.sendFile(indexHtml, (err) => {
       if (err) next(err);
     });
