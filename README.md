@@ -1,6 +1,6 @@
-# Song Toolkit – 432 Hz Audio Conversion API
+# Song Toolkit – 432 Hz Audio Conversion
 
-REST API that converts uploaded MP3 or WAV audio from standard tuning (A4 = 440 Hz) to 432 Hz, preserving duration. Runs on Node.js with TypeScript and FFmpeg.
+REST API and Angular frontend for converting audio (MP3, WAV, FLAC) from standard tuning (A4 = 440 Hz) to 432 Hz, preserving duration. Output is always MP3. Runs on Node.js with TypeScript and FFmpeg.
 
 ## Requirements
 
@@ -31,11 +31,12 @@ ffmpeg -version
 git clone <your-repo-url> Song-Toolkit
 cd Song-Toolkit
 npm ci
+cd frontend && npm ci && cd ..
 npm run build
 npm start
 ```
 
-Server listens on port 3000. To be reachable on your LAN (e.g. `http://192.168.31.10:3000`), it binds to `0.0.0.0`.
+Server listens on port 3000. To be reachable on your LAN (e.g. `http://192.168.31.10:3000`), it binds to `0.0.0.0`. If the frontend is built (`frontend/dist/frontend`), it is served from the same origin.
 
 ### Optional: PM2 for production
 
@@ -69,16 +70,34 @@ npm run dev
 
 Uses `ts-node-dev` with auto-restart on file changes.
 
+## Angular frontend
+
+The frontend provides a drag-and-drop UI with progress bar. Accepted formats: MP3, WAV, FLAC. Output: MP3.
+
+**Development** (frontend on port 4200, API on 3005):
+
+```bash
+# Terminal 1: backend
+npm run dev
+
+# Terminal 2: frontend
+cd frontend && npm start
+```
+
+Edit `frontend/src/environments/environment.development.ts` to set `apiUrl` (e.g. `http://192.168.31.10:3005`).
+
+**Production** (single server): Build frontend and backend, then `npm start`. The server serves the frontend from `/` and the API at `/convert`.
+
 ## API
 
 ### POST /convert
 
 - **Content-Type:** `multipart/form-data`
 - **Field name:** `file`
-- **Accepted types:** MP3 (`.mp3`), WAV (`.wav`)
+- **Accepted types:** MP3 (`.mp3`), WAV (`.wav`), FLAC (`.flac`)
 - **Limit:** 50 MB (configurable via `UPLOAD_MAX_BYTES`)
 
-Response: converted file as download (same format as input). On error: JSON body with `error` (and optional `detail`).
+Response: converted file as MP3 download. On error: JSON body with `error` (and optional `detail`).
 
 ## Test with curl
 
@@ -91,7 +110,7 @@ curl -v -X POST -F "file=@/path/to/audio.mp3" -o converted.mp3 http://192.168.31
 WAV:
 
 ```bash
-curl -v -X POST -F "file=@/path/to/audio.wav" -o converted.wav http://192.168.31.10:3000/convert
+curl -v -F "file=@/path/to/audio.wav" -o converted.mp3 http://192.168.31.10:3000/convert
 ```
 
 Invalid file type (expect 400):
@@ -144,16 +163,20 @@ curl -v -X POST -F "file=@./sample.mp3" -o converted.mp3 http://localhost:3000/c
 ## Project layout
 
 ```
-src/
+src/             # Backend
   index.ts       # Entry, ensure temp dir, start server
-  app.ts         # Express app, CORS, routes, error handler
+  app.ts         # Express app, CORS, routes, serves frontend, error handler
   config.ts      # Port, limits, paths
   routes/convert.ts
   services/ffmpeg.ts   # ffprobe + ffmpeg (safe spawn)
   middleware/upload.ts # Multer + file type validation
   utils/logger.ts      # Structured JSON logging
+frontend/        # Angular app (drag-drop, progress, download)
+  src/app/       # App component
+  src/environments/    # API URL config
 temp/            # Runtime temp files (gitignored)
-dist/            # Compiled output (gitignored)
+dist/            # Backend compiled output (gitignored)
+frontend/dist/   # Frontend build (gitignored)
 ```
 
 ## License

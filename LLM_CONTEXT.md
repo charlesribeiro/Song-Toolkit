@@ -6,16 +6,18 @@ This document summarizes what was built, how it works, issues encountered, and h
 
 ## 1. Project Overview
 
-**Song-Toolkit** is a REST API that:
+**Song-Toolkit** is a REST API plus Angular frontend that:
 
-- Accepts uploaded MP3 or WAV files via `POST /convert`.
+- Accepts uploaded MP3, WAV, or FLAC files via `POST /convert` (or drag-drop UI).
 - Converts audio from standard tuning (A4 = 440 Hz) to 432 Hz using FFmpeg.
 - Preserves original duration (no tempo change).
-- Returns the converted file for download.
+- Returns the converted file as **MP3** for download.
 
-**Stack:** Node.js, TypeScript, Express, Multer (uploads), CORS, FFmpeg/ffprobe via `child_process.spawn`. No heavy Node audio libraries.
+**Backend stack:** Node.js, TypeScript, Express, Multer (uploads), CORS, FFmpeg/ffprobe via `child_process.spawn`. No heavy Node audio libraries.
 
-**Target:** Debian Linux home server (e.g. `192.168.31.10`), development over SSH, optional Docker.
+**Frontend stack:** Angular 18 (standalone components), HttpClient, drag-and-drop, progress bar.
+
+**Target:** Debian Linux home server (e.g. `192.168.31.10`), development over SSH, optional Docker. Frontend can be served by the same Express server or run separately during dev (ng serve on 4200).
 
 ---
 
@@ -32,6 +34,12 @@ This document summarizes what was built, how it works, issues encountered, and h
 
 ```
 Song-Toolkit/
+├── frontend/             # Angular app
+│   ├── src/
+│   │   ├── app/          # App component (drag-drop, upload, progress, download)
+│   │   ├── environments/ # apiUrl for dev (full URL) and prod ('' for same-origin)
+│   │   └── main.ts
+│   └── dist/frontend     # Angular build output (served by Express)
 ├── src/
 │   ├── index.ts           # Entry: ensure temp dir, start server on 0.0.0.0
 │   ├── app.ts             # Express, CORS, request logging, routes, 404, error handler

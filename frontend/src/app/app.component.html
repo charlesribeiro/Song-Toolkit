@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>432 Hz Converter</h1>
+  <p class="subtitle">Convert MP3, WAV, or FLAC to 432 Hz tuning</p>
+
+  @if (status === 'idle' || status === 'error') {
+    <div
+      class="dropzone"
+      [class.drag-over]="dragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()"
+    >
+      <input
+        #fileInput
+        type="file"
+        accept=".mp3,.wav,.flac,audio/mpeg,audio/wav,audio/flac"
+        (change)="onFileSelected($event)"
+      />
+      <span>Drop a file here or click to browse</span>
+      <span class="formats">MP3, WAV, FLAC</span>
+    </div>
+  }
+
+  @if (status === 'uploading') {
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progress"></div>
+      </div>
+      <p class="progress-label">{{ progress === 100 ? 'Processing...' : progress + '%' }}</p>
+    </div>
+  }
+
+  @if (status === 'done') {
+    <div class="done">
+      <p class="done-label">Conversion complete</p>
+      <a [href]="downloadUrl!" [download]="downloadFilename" class="download-btn">
+        Download converted MP3
+      </a>
+      <button type="button" class="reset-btn" (click)="reset()">Convert another</button>
+    </div>
+  }
+
+  @if (status === 'error') {
+    <p class="error">{{ errorMessage }}</p>
+  }
+</div>

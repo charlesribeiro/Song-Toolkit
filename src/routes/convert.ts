@@ -11,7 +11,7 @@ const router = Router();
 
 function safeUnlink(filePath: string): void {
   fs.unlink(filePath, (err) => {
-    if (err) logger.warn("Failed to delete temp file", { path: filePath, error: String(err) });
+    if (err && err.code !== "ENOENT") logger.warn("Failed to delete temp file", { path: filePath, error: String(err) });
   });
 }
 
@@ -21,11 +21,10 @@ router.post(
   validateAudioFile,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const inputPath = req.file!.path;
-    const ext = path.extname(req.file!.originalname).toLowerCase();
-    const outputName = `converted-432${ext}`;
+    const outputName = "converted-432.mp3";
     const outputPath = path.join(
       config.tempDir,
-      `convert-${randomBytes(16).toString("hex")}${ext}`
+      `convert-${randomBytes(16).toString("hex")}.mp3`
     );
 
     const cleanup = (): void => {
@@ -62,8 +61,7 @@ router.post(
     }
 
     res.setHeader("Content-Disposition", `attachment; filename="${outputName}"`);
-    const mime = ext === ".mp3" ? "audio/mpeg" : "audio/wav";
-    res.setHeader("Content-Type", mime);
+    res.setHeader("Content-Type", "audio/mpeg");
 
     const stream = fs.createReadStream(outputPath);
     stream.on("error", (err) => {

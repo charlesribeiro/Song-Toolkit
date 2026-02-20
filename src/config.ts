@@ -15,8 +15,9 @@ export const config = {
     "audio/wav",
     "audio/wave",
     "audio/x-wav",
+    "audio/flac",
   ] as const,
-  allowedExtensions: [".mp3", ".wav"] as const,
+  allowedExtensions: [".mp3", ".wav", ".flac"] as const,
   /** 432 / 440 - pitch ratio for conversion */
   pitchRatio: 432 / 440,
   /** atempo value to restore original duration */
